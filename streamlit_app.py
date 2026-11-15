@@ -23,7 +23,21 @@ def get_gdp_data():
 
     # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
     DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
+    if not DATA_FILENAME.is_file():
+        st.error(f"GDP dataset not found: {DATA_FILENAME}")
+        st.stop()
+
     raw_gdp_df = pd.read_csv(DATA_FILENAME)
+    required_columns = {"Country Code", "Country Name"}
+    missing_columns = required_columns.difference(raw_gdp_df.columns)
+    if missing_columns:
+        raise ValueError(f"GDP dataset is missing columns: {sorted(missing_columns)}")
+    if raw_gdp_df.empty:
+        raise ValueError("GDP dataset contains no country records.")
+    if raw_gdp_df["Country Code"].isna().any():
+        raise ValueError("GDP dataset contains blank country codes.")
+    if raw_gdp_df["Country Code"].duplicated().any():
+        raise ValueError("GDP dataset contains duplicate country codes.")
 
     MIN_YEAR = 1960
     MAX_YEAR = 2022
