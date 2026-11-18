@@ -19,8 +19,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+      - name: Install test dependencies
+        run: python -m pip install pytest
+      - name: Run GDP loader tests
+        run: python -m pytest -q
       - name: Compile application
-        run: python -m py_compile streamlit_app.py
+        run: python -m py_compile streamlit_app.py src/gdp_data.py
       - name: Validate GDP dataset and year coverage
         run: |
           python - <<'PY'
