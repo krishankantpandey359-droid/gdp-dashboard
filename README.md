@@ -44,3 +44,8 @@ GitHub Actions runs the loader tests, compiles the Streamlit app, and validates 
 - The CSV is a static snapshot. The dashboard does not fetch live World Bank data.
 - GDP units, current/constant price basis, and any transformations depend on the bundled source file.
 - The dashboard supports descriptive comparisons. It does not establish causal explanations for GDP changes.
+
+
+## Automated quality gate
+
+The repository's GitHub Actions workflow runs the GDP loader unit tests, compiles the Streamlit entry point and validates the bundled CSV year coverage. Run the same tests locally with `python -m pytest -q`.
