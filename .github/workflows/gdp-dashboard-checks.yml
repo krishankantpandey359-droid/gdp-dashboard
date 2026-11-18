@@ -25,6 +25,8 @@ jobs:
         run: pytest -q
       - name: Validate bundled data
         run: python -c "from src.gdp_data import load_gdp_data; d=load_gdp_data('data/gdp_data.csv'); assert d['Country Name'].notna().all(); print(d.shape)"
+      - name: Verify app imports and bundled dataset
+        run: python -c "import streamlit_app; assert not streamlit_app.gdp_df.empty; print(streamlit_app.gdp_df.shape)"
       - name: Streamlit HTTP smoke test
         run: |
           streamlit run streamlit_app.py --server.headless true --server.port 8501 > streamlit.log 2>&1 &
