@@ -51,3 +51,42 @@ def test_duplicate_country_code_raises(tmp_path):
     frame.to_csv(source, index=False)
     with pytest.raises(ValueError, match="duplicate country codes"):
         load_gdp_data(source)
+
+
+def test_non_numeric_year_value_raises(tmp_path):
+    source = tmp_path / "gdp.csv"
+    frame = pd.DataFrame({
+        "Country Name": ["Alpha"],
+        "Country Code": ["AAA"],
+        **{str(year): [float(year)] for year in range(1960, 2023)},
+    })
+    frame.loc[0, "1960"] = "not-a-number"
+    frame.to_csv(source, index=False)
+    with pytest.raises(ValueError, match="non-numeric values"):
+        load_gdp_data(source)
+
+
+def test_negative_gdp_value_raises(tmp_path):
+    source = tmp_path / "gdp.csv"
+    frame = pd.DataFrame({
+        "Country Name": ["Alpha"],
+        "Country Code": ["AAA"],
+        **{str(year): [float(year)] for year in range(1960, 2023)},
+    })
+    frame.loc[0, "1960"] = -1
+    frame.to_csv(source, index=False)
+    with pytest.raises(ValueError, match="negative GDP"):
+        load_gdp_data(source)
+
+
+def test_infinite_gdp_value_raises(tmp_path):
+    source = tmp_path / "gdp.csv"
+    frame = pd.DataFrame({
+        "Country Name": ["Alpha"],
+        "Country Code": ["AAA"],
+        **{str(year): [float(year)] for year in range(1960, 2023)},
+    })
+    frame.loc[0, "1960"] = float("inf")
+    frame.to_csv(source, index=False)
+    with pytest.raises(ValueError, match="non-finite values"):
+        load_gdp_data(source)
