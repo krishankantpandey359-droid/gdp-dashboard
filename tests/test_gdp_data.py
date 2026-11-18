@@ -60,6 +60,7 @@ def test_non_numeric_year_value_raises(tmp_path):
         "Country Code": ["AAA"],
         **{str(year): [float(year)] for year in range(1960, 2023)},
     })
+    frame["1960"] = frame["1960"].astype(object)
     frame.loc[0, "1960"] = "not-a-number"
     frame.to_csv(source, index=False)
     with pytest.raises(ValueError, match="non-numeric values"):
