@@ -1,4 +1,6 @@
 from pathlib import Path
+
+import numpy as np
 import pandas as pd
 
 MIN_YEAR = 1960
@@ -33,7 +35,7 @@ def load_gdp_data(path):
     if invalid_text.any():
         raise ValueError("GDP dataset contains non-numeric values in year columns.")
     present = numeric_gdp.dropna()
-    if not present.map(lambda value: pd.notna(value) and abs(value) != float("inf")).all():
+    if not np.isfinite(present.to_numpy(dtype=float)).all():
         raise ValueError("GDP dataset contains non-finite values.")
     if (present < 0).any():
         raise ValueError("GDP dataset contains negative GDP values.")
