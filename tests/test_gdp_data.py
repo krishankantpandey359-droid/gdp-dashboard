@@ -21,7 +21,9 @@ def test_load_gdp_data_preserves_country_name_and_tidy_years(tmp_path):
     assert india["Country Name"].eq("India").all()
     assert india["Year"].tolist() == [1960, 1961]
     assert india["GDP"].tolist() == [37.0, 39.0]
-    assert pd.isna(result.loc[(result.Country_Code if "Country_Code" in result else result["Country Code"]) == "JPN", "GDP"].iloc[1])
+    japan = result[result["Country Code"] == "JPN"].sort_values("Year")
+    assert japan["Year"].tolist() == [1960, 1961]
+    assert pd.isna(japan.iloc[1]["GDP"])
 
 
 def test_load_gdp_data_rejects_missing_identifiers(tmp_path):
