@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import math
 from pathlib import Path
+from src.gdp_data import load_gdp_data
 
 # Set the title and favicon that appear in the Browser's tab bar.
 st.set_page_config(
@@ -14,49 +14,11 @@ st.set_page_config(
 
 @st.cache_data
 def get_gdp_data():
-    """Grab GDP data from a CSV file.
+    """Load and validate the bundled GDP dataset as tidy country-year records."""
+    return load_gdp_data(DATA_FILENAME)
 
-    This uses caching to avoid having to read the file every time. If we were
-    reading from an HTTP endpoint instead of a file, it's a good idea to set
-    a maximum age to the cache with the TTL argument: @st.cache_data(ttl='1d')
-    """
 
-    # Instead of a CSV on disk, you could read from an HTTP endpoint here too.
-    DATA_FILENAME = Path(__file__).parent/'data/gdp_data.csv'
-    raw_gdp_df = pd.read_csv(DATA_FILENAME)
-
-    MIN_YEAR = 1960
-    MAX_YEAR = 2022
-
-    # The data above has columns like:
-    # - Country Name
-    # - Country Code
-    # - [Stuff I don't care about]
-    # - GDP for 1960
-    # - GDP for 1961
-    # - GDP for 1962
-    # - ...
-    # - GDP for 2022
-    #
-    # ...but I want this instead:
-    # - Country Name
-    # - Country Code
-    # - Year
-    # - GDP
-    #
-    # So let's pivot all those year-columns into two: Year and GDP
-    gdp_df = raw_gdp_df.melt(
-        ['Country Code'],
-        [str(x) for x in range(MIN_YEAR, MAX_YEAR + 1)],
-        'Year',
-        'GDP',
-    )
-
-    # Convert years from string to integers
-    gdp_df['Year'] = pd.to_numeric(gdp_df['Year'])
-
-    return gdp_df
-
+DATA_FILENAME = Path(__file__).parent / "data" / "gdp_data.csv"
 gdp_df = get_gdp_data()
 
 # -----------------------------------------------------------------------------
@@ -84,7 +46,7 @@ from_year, to_year = st.slider(
     max_value=max_value,
     value=[min_value, max_value])
 
-countries = gdp_df['Country Code'].unique()
+countries = sorted(gdp_df['Country Code'].dropna().unique().tolist())
 
 if not len(countries):
     st.warning("Select at least one country")
@@ -159,7 +121,7 @@ for i, country in enumerate(selected_countries):
                 delta_color = 'normal'
 
         st.metric(
-            label=f'{country} GDP',
+            label=f"{gdp_df.loc[gdp_df['Country Code'] == country, 'Country Name'].dropna().iloc[0] if not gdp_df.loc[gdp_df['Country Code'] == country, 'Country Name'].dropna().empty else country} GDP",
             value=value,
             delta=growth,
             delta_color=delta_color
