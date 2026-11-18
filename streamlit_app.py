@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import math
 from pathlib import Path
-from gdp_data import load_gdp_data
+from src.gdp_data import load_gdp_data
 
 # Set the title and favicon that appear in the Browser's tab bar.
 st.set_page_config(
