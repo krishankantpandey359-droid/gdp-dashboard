@@ -27,5 +27,15 @@ def load_gdp_data(path):
         raise ValueError(f"GDP dataset is missing year columns: {sorted(missing_years)}")
     result = raw.melt(id_vars=IDENTITY_COLUMNS, value_vars=years, var_name="Year", value_name="GDP")
     result["Year"] = pd.to_numeric(result["Year"], errors="raise").astype(int)
-    result["GDP"] = pd.to_numeric(result["GDP"], errors="coerce")
+    raw_gdp = result["GDP"]
+    numeric_gdp = pd.to_numeric(raw_gdp, errors="coerce")
+    invalid_text = raw_gdp.notna() & raw_gdp.astype(str).str.strip().ne("") & numeric_gdp.isna()
+    if invalid_text.any():
+        raise ValueError("GDP dataset contains non-numeric values in year columns.")
+    present = numeric_gdp.dropna()
+    if not present.map(lambda value: pd.notna(value) and abs(value) != float("inf")).all():
+        raise ValueError("GDP dataset contains non-finite values.")
+    if (present < 0).any():
+        raise ValueError("GDP dataset contains negative GDP values.")
+    result["GDP"] = numeric_gdp
     return result
