@@ -138,7 +138,16 @@ def test_nominal_change_percent_calculates_endpoint_change(start, end, expected)
 
 @pytest.mark.parametrize(
     ("start", "end"),
-    [(0.0, 100.0), (None, 100.0), (100.0, None), (float("inf"), 100.0)],
+    [
+        (0.0, 100.0),
+        (-10.0, 100.0),
+        (None, 100.0),
+        (100.0, None),
+        (float("inf"), 100.0),
+        (float("nan"), 100.0),
+        ("not-a-number", 100.0),
+        (pd.NA, 100.0),
+    ],
 )
 def test_nominal_change_percent_returns_none_when_undefined(start, end):
     assert nominal_change_percent(start, end) is None
