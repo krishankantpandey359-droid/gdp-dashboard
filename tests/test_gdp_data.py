@@ -151,3 +151,27 @@ def test_nominal_change_percent_calculates_endpoint_change(start, end, expected)
 )
 def test_nominal_change_percent_returns_none_when_undefined(start, end):
     assert nominal_change_percent(start, end) is None
+
+
+def test_country_identity_whitespace_is_normalized(tmp_path):
+    source = tmp_path / "gdp.csv"
+    sample_csv(source)
+    frame = pd.read_csv(source)
+    frame.loc[0, "Country Name"] = " Alpha "
+    frame.loc[0, "Country Code"] = " AAA "
+    frame.to_csv(source, index=False)
+
+    result = load_gdp_data(source)
+    alpha = result.loc[result["Country Code"] == "AAA"]
+    assert set(alpha["Country Name"]) == {"Alpha"}
+
+
+def test_duplicate_country_codes_after_trimming_raise(tmp_path):
+    source = tmp_path / "gdp.csv"
+    sample_csv(source)
+    frame = pd.read_csv(source)
+    frame.loc[0, "Country Code"] = " AAA "
+    frame.to_csv(source, index=False)
+
+    with pytest.raises(ValueError, match="duplicate country codes after trimming"):
+        load_gdp_data(source)
