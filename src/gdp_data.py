@@ -28,6 +28,7 @@ def load_gdp_data(path):
     for column in IDENTITY_COLUMNS + [INDICATOR_NAME_COLUMN, INDICATOR_CODE_COLUMN]:
         if raw[column].isna().any() or raw[column].astype(str).str.strip().eq("").any():
             raise ValueError(f"GDP dataset contains blank {column.lower()} values.")
+        raw[column] = raw[column].astype(str).str.strip()
 
     if raw[INDICATOR_NAME_COLUMN].nunique() != 1 or not raw[INDICATOR_NAME_COLUMN].eq(
         EXPECTED_INDICATOR_NAME
@@ -38,7 +39,7 @@ def load_gdp_data(path):
     ).all():
         raise ValueError(f"Expected indicator code: {EXPECTED_INDICATOR_CODE}")
     if raw["Country Code"].duplicated().any():
-        raise ValueError("GDP dataset contains duplicate country codes.")
+        raise ValueError("GDP dataset contains duplicate country codes after trimming whitespace.")
 
     years = [str(year) for year in range(MIN_YEAR, MAX_YEAR + 1)]
     missing_years = set(years).difference(raw.columns)
