@@ -123,3 +123,22 @@ def test_infinite_gdp_value_raises(tmp_path):
     frame.to_csv(source, index=False)
     with pytest.raises(ValueError, match="non-finite values"):
         load_gdp_data(source)
+
+
+from src.gdp_data import nominal_change_percent
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "expected"),
+    [(100.0, 125.0, 25.0), (200.0, 150.0, -25.0), (100.0, 100.0, 0.0)],
+)
+def test_nominal_change_percent_calculates_endpoint_change(start, end, expected):
+    assert nominal_change_percent(start, end) == pytest.approx(expected)
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [(0.0, 100.0), (None, 100.0), (100.0, None), (float("inf"), 100.0)],
+)
+def test_nominal_change_percent_returns_none_when_undefined(start, end):
+    assert nominal_change_percent(start, end) is None
