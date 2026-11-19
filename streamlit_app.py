@@ -71,7 +71,9 @@ filtered_gdp_df = gdp_df[
     & (from_year <= gdp_df['Year'])
 ]
 
-st.caption('GDP is measured in current US dollars. The endpoint change is nominal and is not adjusted for inflation.')\n\nst.header('GDP over time', divider='gray')
+st.caption('GDP is measured in current US dollars. The endpoint change is nominal and is not adjusted for inflation.')
+
+st.header('GDP over time', divider='gray')
 
 ''
 
