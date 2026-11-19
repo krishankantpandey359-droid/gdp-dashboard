@@ -171,6 +171,7 @@ def test_duplicate_country_codes_after_trimming_raise(tmp_path):
     sample_csv(source)
     frame = pd.read_csv(source)
     frame.loc[0, "Country Code"] = " AAA "
+    frame.loc[1, "Country Code"] = "AAA"
     frame.to_csv(source, index=False)
 
     with pytest.raises(ValueError, match="duplicate country codes after trimming"):
