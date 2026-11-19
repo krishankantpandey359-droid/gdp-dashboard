@@ -2,7 +2,7 @@ name: GDP dashboard checks
 
 on:
   push:
-    branches: [main, "audit/gdp-dashboard-ci"]
+    branches: [main, "audit/gdp-dashboard-validation", "audit/gdp-dashboard-ci"]
   pull_request:
     branches: [main]
 
@@ -18,25 +18,23 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt pytest
       - name: Compile application
-        run: python -m py_compile streamlit_app.py
-      - name: Validate GDP dataset and year coverage
+        run: python -m py_compile streamlit_app.py src/gdp_data.py
+      - name: Run unit tests
+        run: pytest -q
+      - name: Validate bundled data
+        run: python -c "from src.gdp_data import load_gdp_data; d=load_gdp_data('data/gdp_data.csv'); assert d['Country Name'].notna().all(); print(d.shape)"
+      - name: Verify app imports and bundled dataset
+        run: python -c "import streamlit_app; assert not streamlit_app.gdp_df.empty; print(streamlit_app.gdp_df.shape)"
+      - name: Streamlit HTTP smoke test
         run: |
-          python - <<'PY'
-          from pathlib import Path
-          import pandas as pd
-
-          path = Path("data/gdp_data.csv")
-          assert path.is_file(), "GDP dataset is missing"
-          df = pd.read_csv(path)
-          required = {"Country Code", "Country Name"}
-          missing = required - set(df.columns)
-          assert not missing, f"Missing required columns: {sorted(missing)}"
-          expected_years = {str(year) for year in range(1960, 2023)}
-          missing_years = expected_years - set(df.columns)
-          assert not missing_years, f"Missing GDP year columns: {sorted(missing_years)}"
-          assert not df.empty, "GDP dataset is empty"
-          assert df["Country Code"].notna().any(), "Country codes are all missing"
-          print(f"Validated {len(df)} rows and {len(expected_years)} annual GDP columns.")
-          PY
+          streamlit run streamlit_app.py --server.headless true --server.port 8501 > streamlit.log 2>&1 &
+          APP_PID=$!
+          trap 'kill $APP_PID 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://localhost:8501/ > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat streamlit.log
+          exit 1
