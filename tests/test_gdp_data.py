@@ -91,3 +91,32 @@ def test_infinite_gdp_value_raises(tmp_path):
     frame.to_csv(source, index=False)
     with pytest.raises(ValueError, match="non-finite values"):
         load_gdp_data(source)
+
+
+def test_trailing_empty_export_column_is_ignored(tmp_path):
+    source = tmp_path / "gdp_with_export_column.csv"
+    years = {str(year): [float(year)] for year in range(1960, 2023)}
+    frame = pd.DataFrame({
+        "Country Name": ["Alpha"],
+        "Country Code": ["AAA"],
+        **years,
+        "Unnamed: 66": [None],
+    })
+    frame.to_csv(source, index=False)
+    result = load_gdp_data(source)
+    assert len(result) == 63
+    assert result["Country Code"].eq("AAA").all()
+
+
+def test_populated_unnamed_column_is_rejected(tmp_path):
+    source = tmp_path / "gdp_bad_export.csv"
+    years = {str(year): [float(year)] for year in range(1960, 2023)}
+    frame = pd.DataFrame({
+        "Country Name": ["Alpha"],
+        "Country Code": ["AAA"],
+        **years,
+        "Unnamed: 66": ["unexpected data"],
+    })
+    frame.to_csv(source, index=False)
+    with pytest.raises(ValueError, match="populated blank/unnamed column"):
+        load_gdp_data(source)
