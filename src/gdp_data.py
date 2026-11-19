@@ -66,3 +66,18 @@ def load_gdp_data(path):
         raise ValueError("GDP dataset contains negative GDP values.")
     result["GDP"] = numeric_gdp
     return result
+
+
+def nominal_change_percent(start_value, end_value):
+    """Return nominal endpoint change as a percent, or None if undefined.
+
+    This is a change in current-US-dollar GDP between two selected years.
+    It is not inflation-adjusted real GDP growth.
+    """
+    if start_value is None or end_value is None:
+        return None
+    start = float(start_value)
+    end = float(end_value)
+    if not np.isfinite([start, end]).all() or start == 0:
+        return None
+    return (end / start - 1.0) * 100.0
