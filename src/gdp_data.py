@@ -76,8 +76,11 @@ def nominal_change_percent(start_value, end_value):
     """
     if start_value is None or end_value is None:
         return None
-    start = float(start_value)
-    end = float(end_value)
-    if not np.isfinite([start, end]).all() or start == 0:
+    try:
+        start = float(start_value)
+        end = float(end_value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not np.isfinite([start, end]).all() or start <= 0:
         return None
     return (end / start - 1.0) * 100.0
