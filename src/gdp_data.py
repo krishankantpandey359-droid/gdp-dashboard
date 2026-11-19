@@ -7,12 +7,37 @@ MIN_YEAR = 1960
 MAX_YEAR = 2022
 IDENTITY_COLUMNS = ["Country Name", "Country Code"]
 
+
+def _read_source_csv(path):
+    """Read CSV and safely discard only completely empty export columns."""
+    raw = pd.read_csv(path)
+    raw.columns = [str(column).strip() for column in raw.columns]
+
+    blank_names = [column for column in raw.columns if not column]
+    unnamed_columns = [
+        column for column in raw.columns
+        if column.lower().startswith("unnamed:")
+    ]
+    removable = blank_names + unnamed_columns
+    for column in removable:
+        if raw[column].notna().any():
+            raise ValueError(
+                f"GDP dataset contains a populated blank/unnamed column: {column!r}."
+            )
+    if removable:
+        raw = raw.drop(columns=removable)
+
+    if len(set(raw.columns)) != len(raw.columns):
+        raise ValueError("GDP dataset contains duplicate column names.")
+    return raw
+
+
 def load_gdp_data(path):
     """Read wide World Bank-style data and return tidy GDP records."""
     path = Path(path)
     if not path.is_file():
         raise FileNotFoundError(f"GDP dataset not found: {path}")
-    raw = pd.read_csv(path)
+    raw = _read_source_csv(path)
     missing = set(IDENTITY_COLUMNS).difference(raw.columns)
     if missing:
         raise ValueError(f"GDP dataset is missing columns: {sorted(missing)}")
