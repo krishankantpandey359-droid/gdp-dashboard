@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import csv
 import numpy as np
 import pandas as pd
 
@@ -17,6 +18,14 @@ def load_gdp_data(path):
     path = Path(path)
     if not path.is_file():
         raise FileNotFoundError(f"GDP dataset not found: {path}")
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        header = next(csv.reader(handle), [])
+    if not header:
+        raise ValueError("GDP dataset has an empty CSV header.")
+    if any(not str(name).strip() for name in header):
+        raise ValueError("GDP dataset contains blank column names.")
+    if len(header) != len(set(header)):
+        raise ValueError("GDP dataset contains duplicate column names.")
     raw = pd.read_csv(path)
     required = set(IDENTITY_COLUMNS + [INDICATOR_NAME_COLUMN, INDICATOR_CODE_COLUMN])
     missing = required.difference(raw.columns)
