@@ -13,20 +13,49 @@ EXPECTED_INDICATOR_NAME = "GDP (current US$)"
 EXPECTED_INDICATOR_CODE = "NY.GDP.MKTP.CD"
 
 
+def _read_gdp_source(path):
+    """Read the source CSV, allowing only completely empty export columns."""
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        header = next(csv.reader(handle), [])
+
+    if not header:
+        raise ValueError("GDP dataset has an empty CSV header.")
+
+    normalized_header = [str(name).strip() for name in header]
+    nonblank_header = [name for name in normalized_header if name]
+    if len(nonblank_header) != len(set(nonblank_header)):
+        raise ValueError("GDP dataset contains duplicate column names.")
+
+    blank_positions = [i for i, name in enumerate(normalized_header) if not name]
+    raw = pd.read_csv(path)
+
+    if raw.shape[1] != len(header):
+        raise ValueError("GDP dataset header and data columns do not match.")
+
+    for position in blank_positions:
+        if raw.iloc[:, position].notna().any():
+            raise ValueError("GDP dataset contains a populated blank column.")
+
+    if blank_positions:
+        keep_positions = [i for i in range(raw.shape[1]) if i not in blank_positions]
+        raw = raw.iloc[:, keep_positions]
+
+    raw.columns = normalized_header[:len(normalized_header)]
+    if blank_positions:
+        raw.columns = [name for i, name in enumerate(normalized_header) if i not in blank_positions]
+
+    if len(set(raw.columns)) != len(raw.columns):
+        raise ValueError("GDP dataset contains duplicate column names.")
+    return raw
+
+
 def load_gdp_data(path):
     """Read the bundled World Bank GDP indicator and return tidy records."""
     path = Path(path)
     if not path.is_file():
         raise FileNotFoundError(f"GDP dataset not found: {path}")
-    with path.open("r", encoding="utf-8-sig", newline="") as handle:
-        header = next(csv.reader(handle), [])
-    if not header:
-        raise ValueError("GDP dataset has an empty CSV header.")
-    if any(not str(name).strip() for name in header):
-        raise ValueError("GDP dataset contains blank column names.")
-    if len(header) != len(set(header)):
-        raise ValueError("GDP dataset contains duplicate column names.")
-    raw = pd.read_csv(path)
+    raw = _read_gdp_source(path)
+
     required = set(IDENTITY_COLUMNS + [INDICATOR_NAME_COLUMN, INDICATOR_CODE_COLUMN])
     missing = required.difference(raw.columns)
     if missing:
