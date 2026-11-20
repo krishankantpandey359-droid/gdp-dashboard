@@ -36,13 +36,9 @@ def _read_gdp_source(path):
         if raw.iloc[:, position].notna().any():
             raise ValueError("GDP dataset contains a populated blank column.")
 
-    if blank_positions:
-        keep_positions = [i for i in range(raw.shape[1]) if i not in blank_positions]
-        raw = raw.iloc[:, keep_positions]
-
-    raw.columns = normalized_header[:len(normalized_header)]
-    if blank_positions:
-        raw.columns = [name for i, name in enumerate(normalized_header) if i not in blank_positions]
+    keep_positions = [i for i in range(raw.shape[1]) if i not in blank_positions]
+    raw = raw.iloc[:, keep_positions].copy()
+    raw.columns = [normalized_header[i] for i in keep_positions]
 
     if len(set(raw.columns)) != len(raw.columns):
         raise ValueError("GDP dataset contains duplicate column names.")
