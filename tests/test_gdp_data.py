@@ -176,3 +176,24 @@ def test_duplicate_country_codes_after_trimming_raise(tmp_path):
 
     with pytest.raises(ValueError, match="duplicate country codes after trimming"):
         load_gdp_data(source)
+
+
+def test_trailing_empty_export_column_is_ignored(tmp_path):
+    source = tmp_path / "gdp.csv"
+    sample_csv(source)
+    lines = source.read_text(encoding="utf-8").splitlines()
+    source.write_text("\\n".join(line + "," for line in lines) + "\\n", encoding="utf-8")
+
+    result = load_gdp_data(source)
+    assert len(result) == 2 * 63
+
+
+def test_populated_blank_header_column_is_rejected(tmp_path):
+    source = tmp_path / "gdp.csv"
+    sample_csv(source)
+    lines = source.read_text(encoding="utf-8").splitlines()
+    lines[1] += ",unexpected"
+    source.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="populated blank column"):
+        load_gdp_data(source)
