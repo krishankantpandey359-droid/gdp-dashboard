@@ -1,0 +1,25 @@
+{
+  "dataset_name": "World Bank World Development Indicators",
+  "provider": "The World Bank",
+  "source_id": "2",
+  "source_name": "World Development Indicators",
+  "indicator_code": "NY.GDP.MKTP.CD",
+  "indicator_name": "GDP (current US$)",
+  "measure": "Gross domestic product, current prices",
+  "unit": "Current US dollars (US$)",
+  "price_basis": "Current prices, not adjusted for inflation",
+  "coverage_in_file": {
+    "start_year": 1960,
+    "end_year": 2022,
+    "country_rows": 266
+  },
+  "official_indicator_metadata_url": "https://api.worldbank.org/v2/indicator/NY.GDP.MKTP.CD?format=json",
+  "official_indicator_data_url_template": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.MKTP.CD?date=1960:2022&format=json",
+  "official_data_portal_url": "https://data.worldbank.org/indicator/NY.GDP.MKTP.CD",
+  "terms_url": "https://data.worldbank.org/summary-terms-of-use",
+  "default_license_note": "World Bank datasets are generally provided under CC BY 4.0 unless the dataset or indicator metadata specifies otherwise. Check source-specific restrictions before redistribution.",
+  "dataset_retrieved_date": null,
+  "dataset_retrieved_date_note": "The original download/retrieval date of the bundled CSV is not recorded in the repository. Do not infer it from the final data year (2022).",
+  "snapshot_note": "This metadata identifies the indicator and provider, but does not prove the exact World Bank data vintage used to construct the bundled CSV.",
+  "attribution": "The World Bank: World Development Indicators, indicator NY.GDP.MKTP.CD (GDP, current US$)."
+}
