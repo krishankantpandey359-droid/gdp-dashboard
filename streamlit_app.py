@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import math
 from pathlib import Path
-from src.gdp_data import load_gdp_data
+from src.gdp_data import load_gdp_data, nominal_change_percent
 
 # Set the title and favicon that appear in the Browser's tab bar.
 st.set_page_config(
@@ -71,6 +71,8 @@ filtered_gdp_df = gdp_df[
     & (from_year <= gdp_df['Year'])
 ]
 
+st.caption('GDP is shown in current US dollars. Endpoint changes are nominal, not adjusted for inflation, and are not annualized.')
+
 st.header('GDP over time', divider='gray')
 
 ''
@@ -116,13 +118,19 @@ for i, country in enumerate(selected_countries):
             last_gdp = last_values.iloc[0] / 1_000_000_000
             value = f'{last_gdp:,.0f}B'
 
-            if first_values.empty or first_values.iloc[0] == 0:
+            if first_values.empty:
                 growth = 'n/a'
                 delta_color = 'off'
             else:
-                first_gdp = first_values.iloc[0] / 1_000_000_000
-                growth = f'{last_gdp / first_gdp:,.2f}x'
-                delta_color = 'normal'
+                change_pct = nominal_change_percent(
+                    first_values.iloc[0], last_values.iloc[0]
+                )
+                if change_pct is None:
+                    growth = 'n/a'
+                    delta_color = 'off'
+                else:
+                    growth = f'{change_pct:+.1f}% nominal change'
+                    delta_color = 'normal'
 
         st.metric(
             label=f'{country} GDP',

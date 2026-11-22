@@ -7,7 +7,7 @@ An interactive Streamlit dashboard for exploring annual GDP observations from th
 - Select a year range from 1960 to 2022.
 - Select countries by ISO-style country code.
 - Compare country GDP trends over time.
-- View selected-country GDP values and growth ratios for the chosen period.
+- View selected-country GDP values and nominal endpoint percentage changes for the selected period.
 - Display country names in the chart legend while retaining codes for filtering.
 
 ## Dataset and provenance
@@ -71,7 +71,7 @@ Open the local Streamlit URL printed in the terminal.
 - Values are nominal GDP in current US dollars, not constant-price/real GDP.
 - The dataset includes countries and regional aggregates. Do not treat all 266 rows as independent sovereign countries.
 - Annual observations preserve missing values; missing years are not interpolated.
-- Growth ratios are calculated only when both endpoint observations are available and the starting value is non-zero.
+- Nominal endpoint percentage change is calculated only when both endpoint observations are available and the starting value is positive. It is not a compound annual growth rate or real GDP growth.
 - GDP growth ratios are descriptive comparisons. They do not explain the causes of economic change.
 - Use the same data vintage for fair comparisons. The exact retrieval date of this local snapshot remains undocumented.
 

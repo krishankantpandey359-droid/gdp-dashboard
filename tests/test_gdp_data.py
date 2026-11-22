@@ -7,7 +7,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.gdp_data import load_gdp_data
+from src.gdp_data import load_gdp_data, nominal_change_percent
 
 
 def sample_csv(path):
@@ -120,3 +120,23 @@ def test_populated_unnamed_column_is_rejected(tmp_path):
     frame.to_csv(source, index=False)
     with pytest.raises(ValueError, match="populated blank/unnamed column"):
         load_gdp_data(source)
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "expected"),
+    [(100.0, 125.0, 25.0), (200.0, 150.0, -25.0), (100.0, 100.0, 0.0)],
+)
+def test_nominal_change_percent_calculates_endpoint_change(start, end, expected):
+    assert nominal_change_percent(start, end) == pytest.approx(expected)
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [
+        (0.0, 100.0), (-10.0, 100.0), (None, 100.0), (100.0, None),
+        (float("inf"), 100.0), (float("nan"), 100.0),
+        ("not-a-number", 100.0), (pd.NA, 100.0),
+    ],
+)
+def test_nominal_change_percent_returns_none_when_undefined(start, end):
+    assert nominal_change_percent(start, end) is None
