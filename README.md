@@ -81,4 +81,4 @@ Python, pandas, Streamlit and pytest.
 
 ## Latest GitHub Actions validation
 
-Latest verified successful main-branch workflow run checked on 24 November 2026: [GitHub Actions run #45059868486](https://github.com/krishankantpandey359-droid/gdp-dashboard/actions/runs/45059868486). This run verifies the checks configured in this repository's workflow; it does not replace manual testing of features outside CI.
+Latest verified successful main-branch workflow run checked on 24 November 2026: [GitHub Actions run #45314228954](https://github.com/krishankantpandey359-droid/gdp-dashboard/actions/runs/45314228954). This run verifies the checks configured in this repository's workflow; it does not replace manual testing of features outside CI.
